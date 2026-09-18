@@ -1,6 +1,6 @@
 # AdGuard Home (DoH) — Railway Template
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.app/new?github_url=https://github.com/lNamelessl/adguard-home-railway-template)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/adguard-home-1)
 
 **Your own ad-blocking DNS-over-HTTPS (DoH) server on Railway — encrypted DNS for your phone, laptop, and browsers, from anywhere.**
 
