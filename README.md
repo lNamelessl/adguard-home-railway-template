@@ -20,7 +20,7 @@
 - After setup the same domain serves the **admin UI** and the **`/dns-query` DoH endpoint**
 - One persistent volume at `/data` — config, blocklists, query log, and stats survive redeploys
 - The wrapper auto-injects `http.doh.insecure_enabled: true` (serve DoH over plain HTTP behind
-  Railway's TLS-terminating proxy) and `dns.trusted_proxies` (RFC1918 + loopback, so query logs show
+  Railway's TLS-terminating proxy) and `dns.trusted_proxies` (internal proxy ranges incl. CGNAT, so query logs show
   real client IPs from `X-Forwarded-For` instead of the proxy's address)
 - The wrapper clamps the admin UI back to port 3000 if the wizard's port field (which defaults to
   80) is submitted as-is — Railway's proxy targets 3000
@@ -88,7 +88,7 @@ The entrypoint (`entrypoint.sh`) runs on every boot and idempotently enforces, i
 |---|---|---|
 | `http.address` | `:3000` (clamped from 80) | Railway's proxy targets port 3000 |
 | `http.doh.insecure_enabled` | `true` | Serve `/dns-query` over plain HTTP behind Railway's TLS edge |
-| `dns.trusted_proxies` | `127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, ::1/128` | Honor `X-Forwarded-For` from Railway's proxy so logs/stats show real client IPs |
+| `dns.trusted_proxies` | loopback + RFC1918 + `100.64.0.0/10` (CGNAT, where Railway edge proxies originate) | Honor `X-Forwarded-For` from Railway's proxy so logs/stats show real client IPs |
 
 Railway does not publish fixed ingress CIDRs for its edge proxy, so the template trusts the
 internal RFC1918 ranges (which is where the proxy connections originate). Only services inside your
@@ -121,7 +121,7 @@ deploying with Railway's pricing calculator; set usage limits in your workspace 
   wizard — wait ~10 seconds; the wrapper clamps it back to 3000 and restarts the service.
 - **DoH answers 404**: you queried before the post-setup restart completed; try again after the
   self-restart (~10 s after the wizard).
-- **Query logs show 10.x/172.x client IPs**: a proxy range is missing from `trusted_proxies` —
+- **Query logs show a 100.64.x or 10.x/172.x client IP**: a proxy range is missing from `trusted_proxies` —
   extend the list in `entrypoint.sh` and redeploy.
 - **Everything disappeared after a redeploy**: the volume must be mounted at `/data` (the template
   sets this up). If you recreated the service manually, add the volume and set its mount path to

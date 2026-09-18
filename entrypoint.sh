@@ -36,8 +36,11 @@ apply_proxy_settings() {
     # 1. Plain-HTTP DoH behind Railway's TLS-terminating proxy.
     sed -i 's/insecure_enabled: false/insecure_enabled: true/' "$CONF"
     # 2. Trust Railway's internal proxy networks for X-Forwarded-For.
-    #    Replaces the loopback-only default entry, idempotently.
-    sed -i 's|    - 127.0.0.0/8$|    - 127.0.0.0/8\n    - 10.0.0.0/8\n    - 172.16.0.0/12\n    - 192.168.0.0/16|' "$CONF"
+    #    Observed edge-proxy connections originate from CGNAT (100.64.0.0/10)
+    #    and private ranges. Injected once, then left alone (idempotent).
+    if ! grep -q '    - 100.64.0.0/10' "$CONF"; then
+        sed -i 's|    - 127.0.0.0/8$|    - 127.0.0.0/8\n    - 10.0.0.0/8\n    - 172.16.0.0/12\n    - 192.168.0.0/16\n    - 100.64.0.0/10|' "$CONF"
+    fi
 }
 
 apply_proxy_settings
