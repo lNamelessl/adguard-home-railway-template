@@ -90,11 +90,11 @@ The entrypoint (`entrypoint.sh`) runs on every boot and idempotently enforces, i
 | `http.doh.insecure_enabled` | `true` | Serve `/dns-query` over plain HTTP behind Railway's TLS edge |
 | `dns.trusted_proxies` | loopback + RFC1918 + `100.64.0.0/10` (CGNAT, where Railway edge proxies originate) | Honor `X-Forwarded-For` from Railway's proxy so logs/stats show real client IPs |
 
-Railway does not publish fixed ingress CIDRs for its edge proxy, so the template trusts the
-internal RFC1918 ranges (which is where the proxy connections originate). Only services inside your
-own Railway project share those private networks. Remove/replace entries in `entrypoint.sh` if your
-security posture needs stricter handling — note the admin API/UI does not expose `trusted_proxies`,
-which is exactly why the wrapper injects it.
+Railway does not publish fixed ingress CIDRs for its edge proxy; live testing shows edge
+connections arriving from the CGNAT range `100.64.0.0/10` inside Railway's private network. Only
+services inside your own Railway project share those private networks. Remove/replace entries in
+`entrypoint.sh` if your security posture needs stricter handling — note the admin API/UI does not
+expose `trusted_proxies`, which is exactly why the wrapper injects it.
 
 ## Using your own domain (and real TLS at AdGuard)
 
